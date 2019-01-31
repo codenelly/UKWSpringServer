@@ -1,0 +1,101 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<!--  <link rel="stylesheet" th:href="@{/css/main.css}" type="text/css"/>-->
+<title>Welcome to UrKidsWorld!</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<h1>Welcome to UrKidsWorld School Rest API Server!</h1>
+</head>
+
+<body>
+	<div class="container">
+		<p>Built on Spring boot with Spring security using Jwt token.</p>
+		<p>To do: Angular client school app to consume this API</p>
+		<p>For Now you can test with Postman</p>
+		<table border="1|0">
+			<tr>
+				<th>End Point</th>
+				<th>Request Details</th>
+				<th>Authorized Role</th>
+				<th>Header</th>
+			</tr>
+			<tr>
+				<td>/users/login</td>
+				<td>Sample Json "username" :"User1", "password" : “Pass123"</td>
+				<td>All users</td>
+				<td>Header: [{"key":"Content-Type","value":"application/json","description":""}]</td>
+			</tr>
+			<tr>
+				<td>/users/register</td>
+				<td>Sample Json "firstName" : "Nicky", "lastName" :"David",
+					"userName" :"NickyDavid123", "email" :"NickyD@abc.com", "roles"
+					:["admin"], "password" : “Pass1234”</td>
+				<td>All users</td>
+				<td>Header: [{"key":"Content-Type","value":"application/json","description":""}]</td>
+			</tr>
+			<tr>
+				<td>/student/add</td>
+				<td>Sample Json "classNumber":"1B",
+					"teacherUserName":"JohnDavid123"</td>
+				<td>ADMIN</td>
+				<td> Header: [{"key":"Content-Type","value":"application/json","description":""},
+				{"key":"Authorization","value":"Bearer eyJhbGciOiJSUzI....","description":""}]
+				</td>
+			</tr>
+			<tr>
+				<td>/class/add</td>
+				<td>"studName":"Annie", "classNumber":"1B",
+					"parentUserName":"User1", "scoreMath":23.0, "scoreScience":24.0,
+					"scoreWriting":25.0, "scoreReading":20.0, "scoreLifeSkills":22.0</td>
+				<td>ADMIN</td>
+				<td> Header: [{"key":"Content-Type","value":"application/json","description":""},
+				{"key":"Authorization","value":"Bearer eyJhbGciOiJSUzI....","description":""}]
+				</td>
+			</tr>
+			<tr>
+				<td>/class/getClass/classDet</td>
+				<td>Param className</td>
+				<td>ADMIN OR TEACHER</td>
+				<td> Header: [{"key":"Authorization","value":"Bearer eyJhbGciOiJSUzI....","description":""}]
+				</td>
+			</tr>
+			<tr>
+				<td>/student/getstudents?classNumber</td>
+				<td>Param classNumber</td>
+				<td>ADMIN OR TEACHER</td>
+				<td> Header: [{"key":"Authorization","value":"Bearer eyJhbGciOiJSUzI....","description":""}]
+				</td>
+			</tr>
+			<tr>
+				<td>/student/getmystudent</td>
+				<td>Param classNumber</td>
+				<td>PARENT</td>
+				<td> Header: [{"key":"Authorization","value":"Bearer eyJhbGciOiJSUzI....","description":""}]
+				</td>
+			</tr>
+			<tr>
+				<td>/class/getAllClass</td>
+				<td></td>
+				<td>ADMIN</td>
+				<td> Header: [{"key":"Authorization","value":"Bearer eyJhbGciOiJSUzI....","description":""}]
+				</td>
+			</tr>
+			
+			<tr>
+				<td>/class/updateClass/hw?homeWorkStr</td>
+				<td>homeWorkStr</td>
+				<td>TEACHER</td>
+				<td> Header: [{"key":"Authorization","value":"Bearer eyJhbGciOiJSUzI....","description":""}]
+				</td>
+			</tr>
+
+		</table>
+
+	</div>
+
+</body>
+
+</html>
