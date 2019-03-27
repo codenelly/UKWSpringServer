@@ -101,72 +101,6 @@ public class ControllerTest {
 			return new BCryptPasswordEncoder();
 		}
 
-/*	 
-	  	@Test
-	  	public void with_valid_user_register_test() throws Exception {
-
-		Role role = new Role();
-		role.setRoleName(RoleNames.ROLE_PARENT);
-		User mockUser = new User("Priya", "Priya", "PriyaPV", "PriyaPV@abc.com", "pass123");
-		Optional<Role> roleFromDb = Optional.of(role);
-		Mockito.when(this.roleRepository.findByRoleName(RoleNames.ROLE_PARENT)).thenReturn(roleFromDb);
-		Mockito.when(this.userRepository.save(mockUser)).thenReturn(mockUser);
-		RegisterForm rform = new RegisterForm();
-		rform.setFirstName("Priya");
-		rform.setLastName("Priya");
-		rform.setEmail("PriyaPV@abc.com");
-		rform.setUserName("PriyaPV");
-		Set<String> roleParent = new HashSet<>();
-		roleParent.add("parent");
-		rform.setRoles(roleParent);
-		rform.setPassword("Pass123");
-
-		mvc.perform(post("/users/register").contentType(MediaType.APPLICATION_JSON).content(asJsonString(rform)))
-				.andExpect(status().isOk());		
-	    }
-	 
-	@Test
-	public void with_valid_user_login_test() throws Exception {
-		User user1 = new User("John", "David", "user", "JohnD@abc.com", "password");
-		String encodedpsswd = passwordEncoder().encode("password");
-		user1.setPassword(encodedpsswd);
-		UserDetails userDetails = UkwUser.build(user1);
-		LoginForm lform = new LoginForm();
-		lform.setUsername("user");
-		lform.setPassword("password");
-		Mockito.when(this.userDetailsServiceImpl.loadUserByUsername("user")).thenReturn(userDetails);
-		mvc.perform(post("/users/login").contentType(MediaType.APPLICATION_JSON).content(asJsonString(lform)))
-				.andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
-				   .andExpect(jsonPath("$.accessToken").exists());
-	}
-	
-	@Test
-	public void with_invalid_user_login_test() throws Exception {
-		User user1 = new User("John", "David", "user", "JohnD@abc.com", "password");
-		String encodedpsswd = passwordEncoder().encode("password");
-		user1.setPassword(encodedpsswd);
-		UserDetails userDetails = UkwUser.build(user1);
-		LoginForm lform = new LoginForm();
-		lform.setUsername("user");
-		lform.setPassword("password1");// wrong credentials
-		Mockito.when(this.userDetailsServiceImpl.loadUserByUsername("user")).thenReturn(userDetails);
-		mvc.perform(post("/users/login").contentType(MediaType.APPLICATION_JSON).content(asJsonString(lform)))
-				.andExpect(status().isUnauthorized())
-				   .andExpect(jsonPath("$.accessToken").doesNotExist());
-	}
-	
-	@Test
-	@WithMockUser(roles={"TEACHER"})// only admin role allowed to create classroom
-	public void preauthorise_with_wrong_role_createClass_test() throws Exception{
-		ClassroomReq newClass = new ClassroomReq();
-		newClass.setClassNumber("1A");
-		newClass.setTeacherUserName("user1");
-		mvc.perform(post("/class/add").contentType(MediaType.APPLICATION_JSON).content(asJsonString(newClass))).
-		andExpect(status().isForbidden());
-		
-	}
-	*/
-
 	@Test
 	@WithMockUser(roles={"ADMIN"})// only admin allowed to create class
 	public void preauthorise_with_right_role_createClass_test() throws Exception{
@@ -188,7 +122,7 @@ public class ControllerTest {
 		Mockito.when(this.userRepository.findByUserName("user1")).thenReturn(opUser);
 		Mockito.when(this.classroomRepository.save(newClassRoom)).thenReturn(newClassRoom);
 		// Mockito.when(this.classroomRepository.findByTeacher_Id(1)).thenReturn(value)
-		mvc.perform(post("/class/add").contentType(MediaType.APPLICATION_JSON).content(asJsonString(newClass)))
+		mvc.perform(post("/classes").contentType(MediaType.APPLICATION_JSON).content(asJsonString(newClass)))
 				.andExpect(status().isOk());
 		
 	}
@@ -196,13 +130,13 @@ public class ControllerTest {
 	@Test
 	@WithMockUser(roles={"ADMIN"})
 	public void preauthorize_with_right_role_getClassList_test() throws Exception{
-		mvc.perform(get("/class/getAllClass")).andExpect(status().isOk());
+		mvc.perform(get("/classes")).andExpect(status().isOk());
 	}
 	
 	@Test
 	@WithMockUser(roles={"TEACHER"})
 	public void preauthorize_with_wrong_right_role_getClassList_test() throws Exception{
-		mvc.perform(get("/class/getAllClass")).andExpect(status().isForbidden());
+		mvc.perform(get("/classes")).andExpect(status().isForbidden());
 	}
 	
 	//to do for all controller methods

@@ -24,5 +24,15 @@ public class ClassroomReq {
 	private String classNumber;
 	@NotNull
 	private String teacherUserName;
+	
+	private String homework;
+
+	public String getHomework() {
+		return homework;
+	}
+
+	public void setHomework(String homework) {
+		this.homework = homework;
+	}
 
 }

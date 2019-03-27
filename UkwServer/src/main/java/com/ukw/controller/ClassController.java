@@ -14,11 +14,16 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ukw.message.request.ClassroomReq;
@@ -37,7 +42,7 @@ import com.ukw.security.tokenauth.UkwTokenProvider;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
-@RequestMapping(path = "/class")
+@RequestMapping(path = "/classes")
 public class ClassController {
 	@Autowired
 	AuthenticationManager authenticationManager;
@@ -60,47 +65,46 @@ public class ClassController {
 	@Autowired
 	StudentRepository studentRepository;
 
-	@PostMapping("/add")
+	@PostMapping("")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<String> createClass(@Valid @RequestBody ClassroomReq classroomReq) {
 
 		Optional<User> user = userRepository.findByUserName(classroomReq.getTeacherUserName());
 		if (!user.isPresent()) {
-			return new ResponseEntity<String>("Teacher should be a registered user", HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<String>("{\"message\":\"Teacher should be a registered user\"}", HttpStatus.BAD_REQUEST);
 		} else {
 
 			Set<Role> roleset = user.get().getRoles();
 			if ((!roleset.isEmpty())
 					&& (roleset.stream().anyMatch(r -> r.getRoleName().compareTo(RoleNames.ROLE_TEACHER) == 0))) {
 				if (classRepository.findByClassNumber(classroomReq.getClassNumber()).isPresent())
-					return new ResponseEntity<String>(" classnumber already existsr!!)", HttpStatus.BAD_REQUEST);
+					return new ResponseEntity<String>("{\"message\":\"Classnumber already exists!!\"}", HttpStatus.BAD_REQUEST);
 				Optional<ClassRoomProjection> classProj = classRepository.findByTeacher_Id(user.get().getId());
 
-				// if (classList != null && classList.size() > 0)
-				// if(classRepository.existByTeacher(user.get()))
 				if (classProj.isPresent())
-					return new ResponseEntity<String>(" teacher already assigned another class!!",
+					return new ResponseEntity<String>("{\"message\":\"Teacher already assigned another class!!\"}",
 							HttpStatus.BAD_REQUEST);
 
 				Classroom newClass = new Classroom(classroomReq.getClassNumber());
 				newClass.setTeacher(user.get());
 
 				classRepository.save(newClass);
-				return ResponseEntity.ok().body("Class saved Sucessfully!");
-
+				return new ResponseEntity<String>("{\"message\":\"Class saved Sucessfully!\"}",
+						HttpStatus.OK);
+				
 			} else {
-				return new ResponseEntity<String>(" Only user having teacher role can be a teacher!!)",
+				return new ResponseEntity<String>("{\"message\":\" Only user having teacher role can be a teacher!!\"}",
 						HttpStatus.BAD_REQUEST);
 
 			}
 		}
 	}
 
-	@GetMapping("/getClass/classDet")
+	@GetMapping("/classdetails")
 	@PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
-	public ResponseEntity<?> getClassDetails(String className) {
+	public ResponseEntity<?> getClassDetails(@RequestParam("classname") String classname) {
 
-		Optional<Classroom> classDet = classRepository.findByClassNumber(className);
+		Optional<Classroom> classDet = classRepository.findByClassNumber(classname);
 
 		if ((classDet.isPresent()) && (classDet.get().getTeacher() != null)) {
 			ClassroomResponse classRes = new ClassroomResponse();
@@ -111,29 +115,31 @@ public class ClassController {
 
 		} else
 
-			return new ResponseEntity<String>("Classdetails does not exist!!", HttpStatus.OK);
+			return new ResponseEntity<String>("{\"message\":\" Classdetails does not exist!!\"}", HttpStatus.OK);
 
 	}
+	
+	
 
-	@PostMapping("/updateClass/hw")
+	@PatchMapping("/hw")
 	@PreAuthorize("hasRole('TEACHER')")
-	public ResponseEntity<String> updateHomeWork(String homeWorkStr, @AuthenticationPrincipal UserDetails user) {
+	public ResponseEntity<String> updateHomeWork(@RequestBody ClassroomReq modifiedHwReq, @AuthenticationPrincipal UserDetails user) {
 
 		Optional<Classroom> classExists = classRepository.findByTeacherUserName(user.getUsername());
 
 		if (classExists.isPresent()) {
-			classExists.get().setHomework(homeWorkStr);
+			classExists.get().setHomework(modifiedHwReq.getHomework());
 
 			classRepository.save(classExists.get());
 			return new ResponseEntity<String>("Updated Sucessfully!!", HttpStatus.OK);
 
 		} else {
-			return new ResponseEntity<String>("Teacher is not assigned any classroom yet!!", HttpStatus.OK);
+			return new ResponseEntity<String>("{\"message\":\" Teacher is not assigned any classroom yet!!\"}", HttpStatus.OK);
 		}
 
 	}
 
-	@GetMapping("/getAllClass")
+	@GetMapping("")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<List<ClassRoomProjection>> getClassList() {
 
@@ -143,4 +149,13 @@ public class ClassController {
 
 	}
 
+	@GetMapping("allTeachers")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<List<ClassRoomProjection>> getList() {
+
+		List<ClassRoomProjection> classlistPro = classRepository.findAllProjectedBy();
+
+		return new ResponseEntity<List<ClassRoomProjection>>(classlistPro, HttpStatus.OK);
+
+	}
 }

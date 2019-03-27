@@ -63,7 +63,7 @@ public class UkwWebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		logger.info("MyWebSecurityConfig.class");
-		http.cors().and().csrf().disable().authorizeRequests().antMatchers("/", "/resources/**", "/css/**","/users/**")
+		http.cors().and().csrf().disable().authorizeRequests().antMatchers("/", "/resources/**", "/css/**","/users/login", "/users/registration")
 				.permitAll().anyRequest().authenticated().and().exceptionHandling()
 				.authenticationEntryPoint(myAuthenticationEntryPoint).and().sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);

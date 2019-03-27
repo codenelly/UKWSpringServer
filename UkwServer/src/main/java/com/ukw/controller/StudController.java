@@ -15,9 +15,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ukw.message.request.StudentReq;
@@ -35,7 +37,7 @@ import com.ukw.security.tokenauth.UkwTokenProvider;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
-@RequestMapping(path = "/student")
+@RequestMapping(path = "/students")
 public class StudController {
 	@Autowired
 	AuthenticationManager authenticationManager;
@@ -58,7 +60,7 @@ public class StudController {
 	@Autowired
 	StudentRepository studentRepository;
 
-	@PostMapping("/add")
+	@PostMapping("")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<String> createStudent(@Valid @RequestBody StudentReq studentReq) {
 
@@ -72,19 +74,21 @@ public class StudController {
 				stud.setParent(user.get());
 				stud.setClassRoom(classNo.get());
 				studentRepository.save(stud);
-				return ResponseEntity.ok().body("Student saved sucessfully!");
+				return new ResponseEntity<String>("{\"message\":\"Student added sucessfully!\"}",
+						HttpStatus.OK);
+				
 			} else
-				return new ResponseEntity<String>("Parent is not registered. Please register parent first!!)",
+				return new ResponseEntity<String>("{\"message\":\"Parent is not registered. Please register parent first!!\"}" ,
 						HttpStatus.BAD_REQUEST);
 
 		} else
-			return new ResponseEntity<String>("Classroom with this classnumber does not exist!!",
+			return new ResponseEntity<String>("{\"message\":\"Classroom with this classnumber does not exist!!\"}",
 					HttpStatus.BAD_REQUEST);
 	}
 
-	@GetMapping("/getstudents")
+	@GetMapping("/class")
 	@PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
-	public ResponseEntity<?> getStudList(String classNumber) {
+	public ResponseEntity<?> getStudList(@RequestParam("classnumber") String classNumber) {
 		Optional<Classroom> classNo = classRepository.findByClassNumber(classNumber);
 		if (classNo.isPresent()) {
 
@@ -92,13 +96,12 @@ public class StudController {
 
 			return ResponseEntity.ok().body(list);
 		} else {
-			return new ResponseEntity<String>("Classroom with this classnumber does not exist!!",
-					HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<String>("{\"message\":\"Classroom with this classnumber does not exist!!\"}" , HttpStatus.BAD_REQUEST);
 		}
 
 	}
 
-	@GetMapping("/getmystudent")
+	@GetMapping("/children")
 	@PreAuthorize("hasRole('PARENT')")
 	public ResponseEntity<?> getStudDetails(@AuthenticationPrincipal UserDetails userPrincipal) {
 		Optional<User> user = userRepository.findByUserName(userPrincipal.getUsername());

@@ -52,6 +52,8 @@ public class UkwTokenProvider {
 		Claims claims = Jwts.claims().setSubject(myuser.getUserName());
 		claims.put("role",
 				myuser.getAuthorities().stream().map(sg -> sg.getAuthority()).collect(Collectors.joining("-")));
+		claims.put("username",
+				myuser.getUserName());
 
 		// KeyPair keyPair = Keys.keyPairFor(SignatureAlgorithm.RS256);
 
